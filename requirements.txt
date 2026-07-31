@@ -1,6 +1,5 @@
 streamlit
 python-dotenv
-pyaudioop
 openai
 langchain
 langchain-openai
