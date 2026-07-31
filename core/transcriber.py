@@ -15,7 +15,6 @@ _model = None
 
 
 def extract_youtube_id(url: str) -> str:
-    """Extract 11-digit YouTube video ID."""
     if not url or not isinstance(url, str):
         return None
     pattern = r"(?:v=|\/|vi=)([^" "&?\/\s]{11})"
@@ -24,32 +23,23 @@ def extract_youtube_id(url: str) -> str:
 
 
 def try_get_youtube_transcript(url: str) -> str:
-    """Fast fetch (2 seconds) from YouTube transcripts if available."""
     video_id = extract_youtube_id(url)
     if not video_id:
         return None
 
     try:
-        print(f"⚡ Trying fast YouTube transcript fetch for ID: {video_id}...")
         transcript_list = YouTubeTranscriptApi.get_transcript(
             video_id, languages=["en", "hi", "en-IN"]
         )
-        full_text = " ".join([item["text"] for item in transcript_list])
-        print("✅ Direct transcript fetched successfully in ~2 seconds!")
-        return full_text
-    except Exception as e:
-        print(
-            f"⚠️ Direct transcript not available ({e}). Falling back to Whisper..."
-        )
+        return " ".join([item["text"] for item in transcript_list])
+    except Exception:
         return None
 
 
 def load_model():
     global _model
     if _model is None:
-        print(f"Loading Whisper model: {WHISPER_MODEL} ...")
         _model = whisper.load_model(WHISPER_MODEL)
-        print("Whisper model loaded.")
     return _model
 
 
@@ -107,22 +97,14 @@ def transcribe_chunk(chunk_path: str, language: str = "english") -> str:
 def transcribe_all(
     chunks: list, language: str = "english", source: str = None
 ) -> str:
-    """Main transcription function matching app.py imports."""
-    # 1. Try fast YouTube transcript fetch if source URL is provided
     if source and (source.startswith("http://") or source.startswith("https://")):
         fast_transcript = try_get_youtube_transcript(source)
         if fast_transcript:
             return fast_transcript
 
-    # 2. Otherwise process audio chunks using Whisper / Sarvam
-    engine = "Sarvam AI" if language.lower() == "hinglish" else "Whisper"
-    print(f"Using {engine} for transcription.")
-
     full_transcript = ""
-    for i, chunk in enumerate(chunks):
-        print(f"Transcribing chunk {i + 1}/{len(chunks)}...")
+    for chunk in chunks:
         text = transcribe_chunk(chunk, language=language)
         full_transcript += text + " "
 
-    print("Transcription complete.")
     return full_transcript.strip()
