@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 
 # MUST be loaded before any core/ imports
@@ -37,7 +38,8 @@ st.set_page_config(
 
 st.title("🎥 RAG-Based AI Video Assistant")
 st.caption(
-    "Extract summaries, transcripts, key insights, and chat with your media using RAG."
+    "Extract summaries, transcripts, key insights, and chat with your media"
+    " using RAG."
 )
 st.divider()
 
@@ -100,9 +102,13 @@ if process_btn:
                 chunks = process_input(source_input)
 
                 st.write(
-                    f"🎙️ Step 2/5: Transcribing using **{language_choice}** model..."
+                    f"🎙️ Step 2/5: Transcribing using **{language_choice}**"
+                    " model..."
                 )
-                transcript = transcribe_all(chunks, language=language_choice)
+                # Updated to pass source_input for fast YouTube transcript fetch
+                transcript = transcribe_all(
+                    chunks, language=language_choice, source=source_input
+                )
 
                 st.write("📌 Step 3/5: Generating title and summary...")
                 title = generate_title(transcript)
@@ -119,9 +125,7 @@ if process_btn:
                     try:
                         build_vector_store(transcript)
                     except Exception as rag_err:
-                        st.warning(
-                            f"Vector Store building notice: {rag_err}"
-                        )
+                        st.warning(f"Vector Store building notice: {rag_err}")
 
                 # Save results to session state
                 st.session_state.title = title
@@ -211,8 +215,9 @@ if st.session_state.processed:
                         response = f"RAG Query failed: {err}"
                 else:
                     response = (
-                        "RAG module functions (`query_rag`) can be hooked up directly in "
-                        "`core/rag_engine.py` to enable interactive Q&A."
+                        "RAG module functions (`query_rag`) can be hooked up"
+                        " directly in `core/rag_engine.py` to enable"
+                        " interactive Q&A."
                     )
 
                 st.markdown(response)
@@ -222,5 +227,6 @@ if st.session_state.processed:
 
 else:
     st.info(
-        "👈 Enter your media link or file path in the sidebar and click **Process Video** to get started."
+        "👈 Enter your media link or file path in the sidebar and click"
+        " **Process Video** to get started."
     )
