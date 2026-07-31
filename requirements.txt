@@ -10,7 +10,7 @@ langchain-community
 openai
 tiktoken
 chromadb
-
+faiss-cpu
 
 # # Web Framework
 # streamlit
