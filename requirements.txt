@@ -18,3 +18,4 @@ faiss-cpu
 # Audio & Video Processing
 moviepy
 pydub
+yt-dlp
