@@ -19,3 +19,4 @@ faiss-cpu
 moviepy
 pydub
 yt-dlp
+pyaudioop
