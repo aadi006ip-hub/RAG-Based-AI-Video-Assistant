@@ -47,21 +47,46 @@ if "chat_history" not in st.session_state:
 
 with st.sidebar:
     st.header("⚙️ Settings & Input")
-    source_input = st.text_input(
-        "Media Source (URL or File Path)",
-        value="https://www.youtube.com/watch?v=Q-e_nczWqM",
-    )
+
+    input_type = st.radio("Select Input Type:", ["YouTube URL", "Upload File"])
+
+    source_input = None
+    uploaded_file = None
+
+    if input_type == "YouTube URL":
+        source_input = st.text_input(
+            "YouTube Video Link",
+            value="https://www.youtube.com/watch?v=Q-e_nczWqM",
+        )
+    else:
+        uploaded_file = st.file_uploader(
+            "Upload Audio/Video", type=["mp3", "wav", "mp4", "m4a"]
+        )
+
     language_choice = st.selectbox(
         "Select Language / Model", options=["english", "hinglish"], index=0
     )
     st.markdown("---")
     process_btn = st.button(
-        "🚀 Process Video", type="primary", use_container_width=True
+        "🚀 Process Media", type="primary", use_container_width=True
     )
 
 if process_btn:
-    if not source_input.strip():
-        st.error("Please provide a valid YouTube URL or media path.")
+    valid_input = False
+    file_path = None
+
+    if input_type == "YouTube URL" and source_input and source_input.strip():
+        valid_input = True
+        file_path = source_input.strip()
+    elif input_type == "Upload File" and uploaded_file is not None:
+        valid_input = True
+        os.makedirs("downloades", exist_ok=True)
+        file_path = os.path.join("downloades", uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+    if not valid_input:
+        st.error("Please provide a valid YouTube URL or upload a file.")
     else:
         try:
             with st.status(
@@ -69,17 +94,15 @@ if process_btn:
             ) as status:
                 transcript = None
 
-                # STEP A: Direct fast transcript (Bypasses heavy download)
-                if source_input.startswith(
-                    "http://"
-                ) or source_input.startswith("https://"):
+                # Step 1: YouTube Fast Transcript Check
+                if input_type == "YouTube URL":
                     st.write("⚡ Fetching direct transcript...")
-                    transcript = try_get_youtube_transcript(source_input)
+                    transcript = try_get_youtube_transcript(file_path)
 
-                # STEP B: Fallback to audio download if no direct transcript
+                # Step 2: Fallback / File Processing
                 if not transcript:
-                    st.write("📥 Processing audio...")
-                    chunks = process_input(source_input)
+                    st.write("📥 Processing audio chunks...")
+                    chunks = process_input(file_path)
                     st.write("🎙️ Transcribing audio...")
                     transcript = transcribe_all(
                         chunks, language=language_choice
@@ -179,4 +202,4 @@ if st.session_state.processed:
                     {"role": "assistant", "content": response}
                 )
 else:
-    st.info("👈 Enter media link and click Process Video.")
+    st.info("👈 Enter media link or upload file and click Process Media.")
