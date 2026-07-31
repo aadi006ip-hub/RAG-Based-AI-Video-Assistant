@@ -28,12 +28,24 @@ def try_get_youtube_transcript(url: str) -> str:
         return None
 
     try:
+        # 1. Try direct manual/auto subtitles
         transcript_list = YouTubeTranscriptApi.get_transcript(
-            video_id, languages=["en", "hi", "en-IN"]
+            video_id, languages=["en", "hi", "en-IN", "en-US"]
         )
         return " ".join([item["text"] for item in transcript_list])
     except Exception:
-        return None
+        try:
+            # 2. Fallback to auto-generated transcript list
+            transcript_manifest = YouTubeTranscriptApi.list_transcripts(
+                video_id
+            )
+            transcript = transcript_manifest.find_transcript(
+                ["en", "hi", "en-IN"]
+            )
+            data = transcript.fetch()
+            return " ".join([item["text"] for item in data])
+        except Exception:
+            return None
 
 
 def load_model():
