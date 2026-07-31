@@ -1,36 +1,11 @@
 streamlit
 python-dotenv
 pyaudioop
-yt-dlp
-pydub
-moviepy
+openai
 langchain
 langchain-openai
 langchain-community
-openai
-tiktoken
-chromadb
 faiss-cpu
-
-# # Web Framework
-# streamlit
-
-# # Environment Variables
-# python-dotenv
-
-# # LLM & RAG Framework
-# langchain
-# langchain-openai
-# langchain-community
-# langchain-core
-
-# # Embeddings & Vector Store
-# openai
-# tiktoken
-# faiss-cpu
-
-# # Audio & Video Processing
-# moviepy
-# pydub
-# yt-dlp
-# pyaudioop
+yt-dlp
+youtube-transcript-api
+requests
