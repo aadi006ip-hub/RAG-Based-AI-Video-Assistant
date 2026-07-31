@@ -8,7 +8,8 @@ langchain-core
 langchain-openai
 langchain-community
 langchain-mistralai
-faiss-cpu
+langchain-chroma
+sentence-transformers
 yt-dlp
 youtube-transcript-api
 requests
