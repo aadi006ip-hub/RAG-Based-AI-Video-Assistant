@@ -1,0 +1,20 @@
+# Web Framework
+streamlit
+
+# Environment Variables
+python-dotenv
+
+# LLM & RAG Framework
+langchain
+langchain-openai
+langchain-community
+langchain-core
+
+# Embeddings & Vector Store
+openai
+tiktoken
+faiss-cpu
+
+# Audio & Video Processing
+moviepy
+pydub
