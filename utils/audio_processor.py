@@ -30,14 +30,36 @@ def download_youtube_audio(url: str) -> str:
         "quiet": True,
         "nocheckcertificate": True,
         "geo_bypass": True,
-        "extractor_args": {"youtube": {"player_client": ["ios", "mweb"]}},
+        # Real Browser Headers to bypass YouTube bot block
+        "http_headers": {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                " (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ),
+            "Accept": (
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            ),
+            "Accept-Language": "en-us,en;q=0.5",
+        },
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["web", "mweb", "android"],
+                "player_skip": ["webpage", "configs"],
+            }
+        },
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        raw_audio_path = ydl.prepare_filename(info)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            raw_audio_path = ydl.prepare_filename(info)
 
-    return convert_to_wav(raw_audio_path)
+        return convert_to_wav(raw_audio_path)
+    except Exception as e:
+        raise RuntimeError(
+            f"YouTube Bot Block: {str(e)}\n\n💡 Tip: YouTube link ki jagah"
+            " direct Audio/Video file upload karein!"
+        )
 
 
 def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
