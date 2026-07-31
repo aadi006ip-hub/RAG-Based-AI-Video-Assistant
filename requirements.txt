@@ -1,7 +1,10 @@
 streamlit
 python-dotenv
 openai
+openai-whisper
+pydub
 langchain
+langchain-core
 langchain-openai
 langchain-community
 langchain-mistralai
