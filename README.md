@@ -1,7 +1,7 @@
 # # RAG-Based AI Video Assistant
 An intelligent, Retrieval-Augmented Generation (RAG) system designed to analyze, process, and query video content using Large Language Models (LLMs) and vector embeddings. Ask questions about your video content and receive accurate, context-aware answers grounded in video transcripts or visual context.
 
-
+[![Streamlit App](streamlit.jpg)](https://rag-based-ai-video-assistant-vfbqkzajha7nlirzxkxd9w.streamlit.app/)
 
 ## 📌 Project Structure
 ```text
