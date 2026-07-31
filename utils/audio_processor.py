@@ -7,13 +7,11 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 
 def convert_to_wav(input_path: str) -> str:
-    """Convert any audio/video file to lightweight 16kHz Mono WAV format for Whisper."""
     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
     audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(16000)  # 16kHz mono
+    audio = audio.set_channels(1).set_frame_rate(16000)
     audio.export(output_path, format="wav")
 
-    # Clean up raw heavy download file to save disk space
     if os.path.exists(input_path) and input_path != output_path:
         try:
             os.remove(input_path)
@@ -24,7 +22,6 @@ def convert_to_wav(input_path: str) -> str:
 
 
 def download_youtube_audio(url: str) -> str:
-    """Fast YouTube audio download using ios/mweb client to bypass speed throttling."""
     output_template = os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s")
 
     ydl_opts = {
@@ -33,7 +30,6 @@ def download_youtube_audio(url: str) -> str:
         "quiet": True,
         "nocheckcertificate": True,
         "geo_bypass": True,
-        # 'ios' and 'mweb' clients bypass YouTube datacenter bandwidth throttling!
         "extractor_args": {"youtube": {"player_client": ["ios", "mweb"]}},
     }
 
@@ -41,7 +37,6 @@ def download_youtube_audio(url: str) -> str:
         info = ydl.extract_info(url, download=True)
         raw_audio_path = ydl.prepare_filename(info)
 
-    # Convert small M4A to 16kHz Mono WAV
     return convert_to_wav(raw_audio_path)
 
 
@@ -61,13 +56,9 @@ def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
 
 def process_input(source: str) -> list:
     if source.startswith("http://") or source.startswith("https://"):
-        print("Detected YouTube URL. Downloading audio...")
         wav_path = download_youtube_audio(source)
     else:
-        print("Detected local file. Converting to WAV...")
         wav_path = convert_to_wav(source)
 
-    print("Chunking audio...")
     chunks = chunk_audio(wav_path)
-    print(f"Audio ready — {len(chunks)} chunk(s) created.")
     return chunks
