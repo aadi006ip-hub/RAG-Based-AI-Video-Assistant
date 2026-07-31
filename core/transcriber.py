@@ -16,6 +16,8 @@ _model = None
 
 def extract_youtube_id(url: str) -> str:
     """Extract 11-digit YouTube video ID."""
+    if not url or not isinstance(url, str):
+        return None
     pattern = r"(?:v=|\/|vi=)([^" "&?\/\s]{11})"
     match = re.search(pattern, url)
     return match.group(1) if match else None
@@ -36,7 +38,9 @@ def try_get_youtube_transcript(url: str) -> str:
         print("✅ Direct transcript fetched successfully in ~2 seconds!")
         return full_text
     except Exception as e:
-        print(f"⚠️ Direct transcript not available ({e}). Falling back to Whisper...")
+        print(
+            f"⚠️ Direct transcript not available ({e}). Falling back to Whisper..."
+        )
         return None
 
 
@@ -45,6 +49,7 @@ def load_model():
     if _model is None:
         print(f"Loading Whisper model: {WHISPER_MODEL} ...")
         _model = whisper.load_model(WHISPER_MODEL)
+        print("Whisper model loaded.")
     return _model
 
 
@@ -93,27 +98,31 @@ def transcribe_chunk_sarvam(chunk_path: str) -> str:
     return full_text.strip()
 
 
-def process_transcription(source: str, chunks: list, language: str = "english") -> str:
-    """Smart Transcriber:
+def transcribe_chunk(chunk_path: str, language: str = "english") -> str:
+    if language.lower() == "hinglish":
+        return transcribe_chunk_sarvam(chunk_path)
+    return transcribe_chunk_whisper(chunk_path)
 
-    1. Tries instant YouTube transcript API if URL.
-    2. Fallback to Whisper / Sarvam if no transcript or local file.
-    """
-    # 1. Check if source is YouTube URL and try fast fetch
-    if source.startswith("http://") or source.startswith("https://"):
+
+def transcribe_all(
+    chunks: list, language: str = "english", source: str = None
+) -> str:
+    """Main transcription function matching app.py imports."""
+    # 1. Try fast YouTube transcript fetch if source URL is provided
+    if source and (source.startswith("http://") or source.startswith("https://")):
         fast_transcript = try_get_youtube_transcript(source)
         if fast_transcript:
             return fast_transcript
 
-    # 2. Fallback to Audio Chunks (Whisper / Sarvam)
-    print("Running audio chunk transcription...")
-    full_transcript = ""
+    # 2. Otherwise process audio chunks using Whisper / Sarvam
+    engine = "Sarvam AI" if language.lower() == "hinglish" else "Whisper"
+    print(f"Using {engine} for transcription.")
 
+    full_transcript = ""
     for i, chunk in enumerate(chunks):
-        if language.lower() == "hinglish":
-            text = transcribe_chunk_sarvam(chunk)
-        else:
-            text = transcribe_chunk_whisper(chunk)
+        print(f"Transcribing chunk {i + 1}/{len(chunks)}...")
+        text = transcribe_chunk(chunk, language=language)
         full_transcript += text + " "
 
+    print("Transcription complete.")
     return full_transcript.strip()
